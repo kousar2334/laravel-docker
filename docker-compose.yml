@@ -18,32 +18,37 @@ services:
     volumes: 
         - ./:/var/www/html:cached
         - ./.docker/nginx:/etc/nginx/conf.d
-        - ./.docker/nginx/ssl:/etc/nginx/confd/ssl
+        - ./.docker/nginx/ssl:/etc/nginx/conf.d/ssl
     depends_on: 
         - php
-        - mysql
     networks: 
         - laravel-docker-network
       
   php:
     build:
-       context: .
+       context: ./.docker/php
        dockerfile: DockerFile 
-    container_name: laravel_php     
+    container_name: laravel-php     
     restart: unless-stopped
     tty: true
     volumes:
-       - ./src:/var/www/html
+       - ./:/var/www/html:cached
+       - ./.docker/php/php-fpm.ini:/user/local/etc/php/conf.d/custom.ini
+       - ~/.ssh:/root/.ssh
+    depends_on: 
+        - mysql
+        - redis   
     networks: 
       - laravel-docker-network   
 
   mysql:    
     image: mysql:latest
-    container_name: laravel_mysql
+    container_name: laravel-mysql
+    restart: unless-stopped
     ports:
        - 3306:3306
     volumes:
-       - ./mysql:/var/lib/mysql
+       - ./data/mysql:/var/lib/mysql
     environment:
        MYSQL_DATABASE : laravel_test_database
        MYSQL_USER : laravel_test_database_user
@@ -52,11 +57,22 @@ services:
     networks: 
       - laravel-docker-network
 
+  redis:
+    image: redis:alpine
+    container_name: laravel-redis
+    restart: unless-stopped
+    ports:
+       - 6379:6379
+    volumes:
+       - ./data/redis:/data  
+    networks: 
+      - laravel-docker-network   
+
   composer: 
     image: composer:latest
-    container_name: laravel_composer
+    container_name: laravel-composer
     volumes:
-      - ./src:/var/www/html
+      - ./:/var/www/html
     working_dir: /var/www/html
     command: ["composer", "install", "--ignore-platform-reqs"]
     depends_on:
@@ -66,11 +82,11 @@ services:
 
   artisan:
     build:
-      context: .
-      dockerfile: DockerFile
-    container_name: laravel_artisan
+      context: ./.docker/php
+      dockerfile: DockerFile 
+    container_name: laravel-artisan
     volumes:
-      - ./src:/var/www/html
+      - ./:/var/www/html
     working_dir: /var/www/html
     entrypoint: ["php", "artisan"]
     networks:

@@ -1,0 +1,34 @@
+FROM php:8.3-fpm-alpine
+
+ENV PECL_EXTENSIONS="pcov psr redis"
+
+# Install requred packages for composer
+RUN apk update && apk add --no-cache \
+    curl \
+    zip \
+    unzip \
+    libzip-dev \
+    zlib-dev \
+    libjpeg-turbo-dev \
+    freetype-dev \
+    oniguruma-dev \
+    build-base
+
+RUN docker-php-ext-install pdo pdo_mysql mbstring exif pcntl bcmath gd zip
+
+RUN docker-php-ext-configure gd --with-jpeg --with-freetype
+
+RUN pecl channel-update pecl.php.net
+
+RUN  pecl install $PECL_EXTENSIONS \
+    && cd /usr/src/php/ext/ \
+    && docker-php-ext-enable $PECL_EXTENSIONS
+
+# Install Composer
+
+COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
+
+
+WORKDIR /var/www/html
+
+USER www-data
