@@ -90,4 +90,14 @@ services:
     working_dir: /var/www/html
     entrypoint: ["php", "artisan"]
     networks:
-      - laravel-docker-network                 
+      - laravel-docker-network   
+
+  npm:
+    image: node:latest
+    container_name: laravel-npm
+    volumes:
+      - ./:/var/www//html
+    working_dir: /var/www/html
+    entrypoint: ["npm"]  
+    networks:
+      - laravel-docker-network                  

@@ -25,6 +25,8 @@ RUN  pecl install $PECL_EXTENSIONS \
     && cd /usr/src/php/ext/ \
     && docker-php-ext-enable $PECL_EXTENSIONS
 
+    
+
 # Install Composer
 
 COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
