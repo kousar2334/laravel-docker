@@ -18,6 +18,7 @@ RUN docker-php-ext-install pdo pdo_mysql mbstring exif pcntl bcmath gd zip
 
 RUN docker-php-ext-configure gd --with-jpeg --with-freetype
 
+#Install Pecl entensions
 RUN pecl channel-update pecl.php.net
 
 RUN  pecl install $PECL_EXTENSIONS \
