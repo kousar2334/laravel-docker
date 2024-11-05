@@ -46,7 +46,7 @@ services:
     container_name: laravel-mysql
     restart: unless-stopped
     ports:
-       - 3306:3306
+       - "3306:3306"
     volumes:
        - ./data/mysql:/var/lib/mysql
     environment:
